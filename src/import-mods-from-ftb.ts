@@ -2,7 +2,7 @@ import wiki, { Page } from "wikijs";
 import wikidata from "wikidata-sdk";
 import got from "got";
 import dotenv from "dotenv";
-import wikibaseEditor from "wikidata-edit";
+import wikibaseEditor from "wikibase-edit";
 
 const envResult = dotenv.config();
 
@@ -12,8 +12,12 @@ if (envResult.error) {
 }
 
 const wbEdit = wikibaseEditor({
-  username: process.env.WIKIBASE_USERNAME,
-  password: process.env.WIKIBASE_PASSWORD,
+  instance: "https://www.wikidata.org",
+  credentials: {
+    username: process.env.WIKIBASE_USERNAME,
+    password: process.env.WIKIBASE_PASSWORD,
+  },
+  summary: "Import Minecraft mods from Feed the Beast wiki",
   bot: true,
 });
 
@@ -38,7 +42,7 @@ const wbEdit = wikibaseEditor({
     (item: any) => item.itemLabel.value
   );
 
-  ftbCategory
+  const entities = ftbCategory
     .filter((value) => !existingModNames.includes(value))
     .filter((value) => !value.startsWith("Category:"))
     .filter((value) => !value.startsWith("User:"))
@@ -53,13 +57,14 @@ const wbEdit = wikibaseEditor({
         // Gamepedia article ID
         P6623: `ftb:${modTitle}`,
       },
-    }))
-    .forEach((modEntity) => {
-      if (process.env.DRY_RUN) {
-        console.log(modEntity);
-      } else {
-        console.log(`ADDING ${modEntity.labels.en} to WIKIDATA!`);
-        wbEdit.entity.create(modEntity);
-      }
-    });
+    }));
+
+  for (const entity of entities) {
+    if (process.env.DRY_RUN) {
+      console.log(entity);
+    } else {
+      console.log(`ADDING ${entity.labels.en} to WIKIDATA!`);
+      await wbEdit.entity.create(entity);
+    }
+  }
 })();
