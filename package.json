@@ -1,0 +1,32 @@
+{
+  "name": "@keplersj/wiki-scripts",
+  "version": "0.0.0-development",
+  "description": "The scripts run by Keplerbot on Wikidata and Wikipedia",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/keplersj/wiki-scripts.git"
+  },
+  "author": "Kepler Sticka-Jones <kepler@stickajones.org>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/keplersj/wiki-scripts/issues"
+  },
+  "homepage": "https://github.com/keplersj/wiki-scripts#readme",
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "got": "^11.1.3",
+    "wikidata-edit": "^2.9.3",
+    "wikidata-sdk": "^7.4.1",
+    "wikijs": "^6.0.1"
+  },
+  "devDependencies": {
+    "@types/jest": "^25.2.1",
+    "jest": "^26.0.1",
+    "prettier": "^2.0.5",
+    "typescript": "^3.8.3"
+  }
+}
