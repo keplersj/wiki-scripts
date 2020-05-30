@@ -4,7 +4,8 @@
   "description": "The scripts run by Keplerbot on Wikidata and Wikipedia",
   "main": "dist/index.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "build": "tsc"
   },
   "repository": {
     "type": "git",
@@ -22,6 +23,7 @@
     "ink": "^2.7.1",
     "ink-link": "^1.1.0",
     "ink-table": "^2.0.1",
+    "inquirer": "^7.1.0",
     "react": "^16.13.1",
     "wikibase-edit": "^4.2.6",
     "wikidata-edit": "^2.9.3",
@@ -29,6 +31,7 @@
     "wikijs": "^6.0.1"
   },
   "devDependencies": {
+    "@types/inquirer": "^6.5.0",
     "@types/jest": "^25.2.1",
     "@types/react": "^16.9.35",
     "jest": "^26.0.1",
