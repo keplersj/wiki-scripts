@@ -54,7 +54,7 @@ interface RegistryPkg {
       _hasShrinkwrap: boolean;
     };
   };
-  time: object;
+  time: { [version: string]: string };
   maintainers: { name: string; email: string }[];
   description: string;
   homepage: string;
@@ -90,6 +90,13 @@ interface WikiObject {
       // Or a single value
       | number
       | string
+      | {
+          value: string;
+          qualifiers?: {
+            [prop: string]: string | string[] | object;
+          };
+          references?: { [prop: string]: string | object }[];
+        }
       // Or a rich value object
       | { text: string; language: string }
       // Or even an array of mixed simple values and rich object values
@@ -104,7 +111,7 @@ interface WikiObject {
           qualifiers?: {
             [prop: string]: string | string[] | object;
           };
-          references?: { [prop: string]: string | object };
+          references?: { [prop: string]: string | object }[];
         }[];
   };
   sitelinks?: {
@@ -131,6 +138,10 @@ function sanitizeUrl(url: string): string {
   return url.replace("git+", "");
 }
 
+function convertToWikiDate(date: Date): string {
+  return date.toISOString().split("T")[0];
+}
+
 function npmPkgToWikiObject(pkg: RegistryPkg): WikiObject {
   return {
     labels: {
@@ -143,11 +154,75 @@ function npmPkgToWikiObject(pkg: RegistryPkg): WikiObject {
       // assume an instance of 'JavaScript library'
       P31: "Q783866",
       // source code repository
-      P1324: sanitizeUrl(pkg.repository.url),
+      P1324: {
+        value: sanitizeUrl(pkg.repository.url),
+        references: [
+          {
+            //reference URL
+            P854: `https://cdn.jsdelivr.net/npm/${pkg.name}@${
+              pkg.versions[Object.keys(pkg.versions).length - 1]
+            }/package.json`,
+            // retrieved
+            P813: convertToWikiDate(new Date()),
+          },
+          {
+            //reference URL
+            P854: `https://unpkg.com/${pkg.name}@${
+              pkg.versions[Object.keys(pkg.versions).length - 1]
+            }/package.json`,
+            // retrieved
+            P813: convertToWikiDate(new Date()),
+          },
+        ],
+      },
       // official website
-      P856: pkg.homepage,
+      P856: {
+        value: pkg.homepage,
+        references: [
+          {
+            //reference URL
+            P854: `https://cdn.jsdelivr.net/npm/${pkg.name}@${
+              pkg.versions[Object.keys(pkg.versions).length - 1]
+            }/package.json`,
+            // retrieved
+            P813: convertToWikiDate(new Date()),
+          },
+          {
+            //reference URL
+            P854: `https://unpkg.com/${pkg.name}@${
+              pkg.versions[Object.keys(pkg.versions).length - 1]
+            }/package.json`,
+            // retrieved
+            P813: convertToWikiDate(new Date()),
+          },
+        ],
+      },
       // software version identifier
-      P348: Object.values(pkg.versions).map(({ version }) => version),
+      P348: Object.values(pkg.versions).map(({ version }) => ({
+        value: version,
+        qualifiers: {
+          //publication date
+          P577: convertToWikiDate(new Date(pkg.time[version])),
+        },
+        references: [
+          {
+            //reference URL
+            P854: `https://cdn.jsdelivr.net/npm/${pkg.name}@${version}/package.json`,
+            //publication date
+            P577: convertToWikiDate(new Date(pkg.time[version])),
+            // retrieved
+            P813: convertToWikiDate(new Date()),
+          },
+          {
+            //reference URL
+            P854: `https://unpkg.com/${pkg.name}@${version}/package.json`,
+            //publication date
+            P577: convertToWikiDate(new Date(pkg.time[version])),
+            // retrieved
+            P813: convertToWikiDate(new Date()),
+          },
+        ],
+      })),
       P8262: pkg.name,
     },
   };
