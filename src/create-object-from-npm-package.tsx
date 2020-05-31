@@ -3,7 +3,7 @@ import got from "got";
 import wikidata from "wikidata-sdk";
 import dotenv from "dotenv";
 import wikibaseEditor from "wikibase-edit";
-import util from "util";
+import chalk from "chalk";
 
 interface WikiDataQuery {
   head: { vars: ["item", "itemLabel", "value"] };
@@ -37,11 +37,9 @@ interface RegistryPkg {
       license: string;
       bugs: object;
       homepage: string;
-      devDependencies: Object;
-      dependencies: Object;
-      peerDependencies: Object;
-      stylelint: Object;
-      eslintConfig: Object;
+      devDependencies: { [pkgName: string]: string };
+      dependencies: { [pkgName: string]: string };
+      peerDependencies: { [pkgName: string]: string };
       gitHead: string;
       _id: string;
       _nodeVersion: string;
@@ -142,8 +140,50 @@ function convertToWikiDate(date: Date): string {
   return date.toISOString().split("T")[0];
 }
 
-function npmPkgToWikiObject(pkg: RegistryPkg): WikiObject {
-  return {
+function hostPackageJsons(pkgName: string, version: string): string[] {
+  return [
+    `https://cdn.jsdelivr.net/npm/${pkgName}@${version}/package.json`,
+    `https://unpkg.com/${pkgName}@${version}/package.json`,
+  ];
+}
+
+async function npmToWikiData(pkgName: string): Promise<string> {
+  const matchesUrl = wikidata.sparqlQuery(`
+    SELECT ?item ?itemLabel ?value WHERE {
+        ?item wdt:P8262 ?value.
+        SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en". }
+       FILTER(?value = "${pkgName}").
+    }
+  `);
+
+  const { body: matches } = await got.get<WikiDataQuery>(matchesUrl, {
+    responseType: "json",
+    headers: { Accept: "application/sparql-results+json" },
+  });
+
+  if (matches.results.bindings.length != 0) {
+    const splitMatch = matches.results.bindings[0].item.value.split("/");
+    const match = splitMatch[splitMatch.length - 1];
+    console.log(chalk.yellow(`Found entity ${match} (${pkgName})`));
+    return match;
+  } else {
+    console.log(chalk.red(`No entity for ${pkgName}`));
+  }
+
+  const { body: pkg } = await got.get<RegistryPkg>(
+    `https://registry.npmjs.com/${pkgName}`,
+    {
+      responseType: "json",
+    }
+  );
+
+  const deps = Object.keys(
+    pkg.versions[pkg["dist-tags"].latest].dependencies || {}
+  ).concat(
+    Object.keys(pkg.versions[pkg["dist-tags"].latest].peerDependencies || {})
+  );
+
+  const wikiObject = {
     labels: {
       en: pkg.name,
     },
@@ -154,49 +194,51 @@ function npmPkgToWikiObject(pkg: RegistryPkg): WikiObject {
       // assume an instance of 'JavaScript library'
       P31: "Q783866",
       // source code repository
-      P1324: {
-        value: sanitizeUrl(pkg.repository.url),
-        references: [
-          {
+      P1324: pkg.repository &&
+        pkg.repository.url && {
+          value: sanitizeUrl(pkg.repository.url),
+          references: hostPackageJsons(
+            pkg.name,
+            Object.keys(pkg.versions)[Object.keys(pkg.versions).length - 1]
+          ).map((url) => ({
             //reference URL
-            P854: `https://cdn.jsdelivr.net/npm/${pkg.name}@${
-              Object.keys(pkg.versions)[Object.keys(pkg.versions).length - 1]
-            }/package.json`,
+            P854: url,
             // retrieved
             P813: convertToWikiDate(new Date()),
-          },
-          {
-            //reference URL
-            P854: `https://unpkg.com/${pkg.name}@${
-              Object.keys(pkg.versions)[Object.keys(pkg.versions).length - 1]
-            }/package.json`,
-            // retrieved
-            P813: convertToWikiDate(new Date()),
-          },
-        ],
-      },
+          })),
+        },
       // official website
-      P856: {
+      P856: pkg.homepage && {
         value: pkg.homepage,
-        references: [
-          {
-            //reference URL
-            P854: `https://cdn.jsdelivr.net/npm/${pkg.name}@${
-              Object.keys(pkg.versions)[Object.keys(pkg.versions).length - 1]
-            }/package.json`,
-            // retrieved
-            P813: convertToWikiDate(new Date()),
-          },
-          {
-            //reference URL
-            P854: `https://unpkg.com/${pkg.name}@${
-              Object.keys(pkg.versions)[Object.keys(pkg.versions).length - 1]
-            }/package.json`,
-            // retrieved
-            P813: convertToWikiDate(new Date()),
-          },
-        ],
+        references: hostPackageJsons(
+          pkg.name,
+          Object.keys(pkg.versions)[Object.keys(pkg.versions).length - 1]
+        ).map((url) => ({
+          //reference URL
+          P854: url,
+          // retrieved
+          P813: convertToWikiDate(new Date()),
+        })),
       },
+      //depends on software
+      P1547: await Promise.all(
+        // recursively finds (and creates if needed) WikiData objects for direct and peer deps
+        deps.map(async (dep) => {
+          const wikidataObject = await npmToWikiData(dep);
+          return {
+            value: wikidataObject,
+            references: hostPackageJsons(
+              pkg.name,
+              Object.keys(pkg.versions)[Object.keys(pkg.versions).length - 1]
+            ).map((url) => ({
+              //reference URL
+              P854: url,
+              // retrieved
+              P813: convertToWikiDate(new Date()),
+            })),
+          };
+        })
+      ),
       // software version identifier
       P348: Object.values(pkg.versions).map(({ version }) => ({
         value: version,
@@ -204,28 +246,22 @@ function npmPkgToWikiObject(pkg: RegistryPkg): WikiObject {
           //publication date
           P577: convertToWikiDate(new Date(pkg.time[version])),
         },
-        references: [
-          {
-            //reference URL
-            P854: `https://cdn.jsdelivr.net/npm/${pkg.name}@${version}/package.json`,
-            //publication date
-            P577: convertToWikiDate(new Date(pkg.time[version])),
-            // retrieved
-            P813: convertToWikiDate(new Date()),
-          },
-          {
-            //reference URL
-            P854: `https://unpkg.com/${pkg.name}@${version}/package.json`,
-            //publication date
-            P577: convertToWikiDate(new Date(pkg.time[version])),
-            // retrieved
-            P813: convertToWikiDate(new Date()),
-          },
-        ],
+        references: hostPackageJsons(pkg.name, version).map((url) => ({
+          //reference URL
+          P854: url,
+          //publication date
+          P577: convertToWikiDate(new Date(pkg.time[version])),
+          // retrieved
+          P813: convertToWikiDate(new Date()),
+        })),
       })),
       P8262: pkg.name,
     },
   };
+
+  const { entity } = await wbEdit.entity.create(wikiObject);
+  console.log(chalk.green(`Created entity ${entity.id} (${pkg.name})`));
+  return entity.id;
 }
 
 async function main() {
@@ -237,40 +273,7 @@ async function main() {
     },
   ]);
 
-  const matchesUrl = wikidata.sparqlQuery(`
-    SELECT ?item ?itemLabel ?value WHERE {
-        ?item wdt:P8262 ?value.
-        SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en". }
-       FILTER(?value = "${pkgName}").
-    }
-  `);
-
-  const { body: matches } = await got.get<WikiDataQuery>(matchesUrl, {
-    responseType: "json",
-  });
-
-  if (matches.results.bindings.length != 0) {
-    console.error(
-      `WikiData already contains object(s) with '${pkgName}' attached.`
-    );
-    return;
-  }
-
-  const { body: pkg } = await got.get<RegistryPkg>(
-    `https://registry.npmjs.com/${pkgName}`,
-    {
-      responseType: "json",
-    }
-  );
-
-  const wikiObject = npmPkgToWikiObject(pkg);
-
-  if (process.env.DRY_RUN) {
-    console.log(util.inspect(wikiObject, false, 10));
-  } else {
-    const { entity } = await wbEdit.entity.create(wikiObject);
-    console.log("created item id", entity.id);
-  }
+  await npmToWikiData(pkgName);
 }
 
 main();
