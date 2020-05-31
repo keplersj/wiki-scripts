@@ -160,7 +160,7 @@ function npmPkgToWikiObject(pkg: RegistryPkg): WikiObject {
           {
             //reference URL
             P854: `https://cdn.jsdelivr.net/npm/${pkg.name}@${
-              pkg.versions[Object.keys(pkg.versions).length - 1]
+              Object.keys(pkg.versions)[Object.keys(pkg.versions).length - 1]
             }/package.json`,
             // retrieved
             P813: convertToWikiDate(new Date()),
@@ -168,7 +168,7 @@ function npmPkgToWikiObject(pkg: RegistryPkg): WikiObject {
           {
             //reference URL
             P854: `https://unpkg.com/${pkg.name}@${
-              pkg.versions[Object.keys(pkg.versions).length - 1]
+              Object.keys(pkg.versions)[Object.keys(pkg.versions).length - 1]
             }/package.json`,
             // retrieved
             P813: convertToWikiDate(new Date()),
@@ -182,7 +182,7 @@ function npmPkgToWikiObject(pkg: RegistryPkg): WikiObject {
           {
             //reference URL
             P854: `https://cdn.jsdelivr.net/npm/${pkg.name}@${
-              pkg.versions[Object.keys(pkg.versions).length - 1]
+              Object.keys(pkg.versions)[Object.keys(pkg.versions).length - 1]
             }/package.json`,
             // retrieved
             P813: convertToWikiDate(new Date()),
@@ -190,7 +190,7 @@ function npmPkgToWikiObject(pkg: RegistryPkg): WikiObject {
           {
             //reference URL
             P854: `https://unpkg.com/${pkg.name}@${
-              pkg.versions[Object.keys(pkg.versions).length - 1]
+              Object.keys(pkg.versions)[Object.keys(pkg.versions).length - 1]
             }/package.json`,
             // retrieved
             P813: convertToWikiDate(new Date()),
