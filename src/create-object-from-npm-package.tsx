@@ -179,17 +179,19 @@ async function npmToWikiData(pkgName: string): Promise<string> {
 
   const deps = Object.keys(
     pkg.versions[pkg["dist-tags"].latest].dependencies || {}
-  ).concat(
-    Object.keys(pkg.versions[pkg["dist-tags"].latest].peerDependencies || {})
   );
+  // ).concat(
+  //   Object.keys(pkg.versions[pkg["dist-tags"].latest].peerDependencies || {})
+  // );
 
   const wikiObject = {
     labels: {
       en: pkg.name,
     },
-    descriptions: {
-      en: pkg.description,
-    },
+    descriptions: pkg.description &&
+      pkg.name !== pkg.description && {
+        en: pkg.description,
+      },
     claims: {
       // assume an instance of 'JavaScript library'
       P31: "Q783866",
