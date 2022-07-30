@@ -4,6 +4,7 @@
   "description": "The scripts run by Keplerbot on Wikidata and Wikipedia",
   "main": "dist/index.js",
   "scripts": {
+    "start": "node dist/index.js",
     "test": "jest",
     "build": "tsc"
   },
