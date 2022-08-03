@@ -23,7 +23,7 @@ async function quickstatementNpmPackage(
 
   const date = new Date();
 
-  return `${wikidataId}\tP856\t"${homepage}"\tS654\t"https://registry.npmjs.org/${packageName}"\tS813\t+${date.getFullYear()}-${String(
+  return `${wikidataId}\tP856\t"${homepage}"\tS854\t"https://registry.npmjs.org/${packageName}"\tS813\t+${date.getFullYear()}-${String(
     date.getMonth() + 1
   ).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}T00:00:00Z/11`;
 }
