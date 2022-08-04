@@ -8,6 +8,13 @@ SELECT DISTINCT ?item ?itemLabel ?npmPackageName WHERE {
 }
 `);
 
+function wikiDataDate(date: Date): string {
+  return `+${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
+    2,
+    "0"
+  )}-${String(date.getDate()).padStart(2, "0")}T00:00:00Z/11`;
+}
+
 async function quickstatementNpmPackage(
   packageName: string,
   wikidataId: string
@@ -23,9 +30,9 @@ async function quickstatementNpmPackage(
 
   const date = new Date();
 
-  return `${wikidataId}\tP856\t"${homepage}"\tS854\t"https://registry.npmjs.org/${packageName}"\tS813\t+${date.getFullYear()}-${String(
-    date.getMonth() + 1
-  ).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}T00:00:00Z/11`;
+  return `${wikidataId}\tP856\t"${homepage}"\tS854\t"https://registry.npmjs.org/${packageName}"\tS813\t${wikiDataDate(
+    date
+  )}`;
 }
 
 for (const obj of (queryRes as any).results.bindings) {
