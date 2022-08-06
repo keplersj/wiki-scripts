@@ -1,18 +1,24 @@
 import got from "got";
 import { queryWikidata } from "./wikidata-query.js";
+import stripIndent from "strip-indent";
 
 const queryRes = await queryWikidata(`
-SELECT DISTINCT ?item ?itemLabel ?npmPackageName WHERE {
+SELECT DISTINCT ?item ?itemLabel ?npmPackageName ?homepage ?versions WHERE {
   ?item wdt:P8262 ?npmPackageName.
+  OPTIONAL { ?item wdt:P856 ?homepage. }
+  OPTIONAL { ?item wdt:P348 ?versions. }
   SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE]". }
 }
+
+LIMIT 10
 `);
 
-function wikiDataDate(date: Date): string {
-  return `+${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
-    2,
-    "0"
-  )}-${String(date.getDate()).padStart(2, "0")}T00:00:00Z/11`;
+function wikiDataDate(date: Date = new Date()): string {
+  return `+${date.toISOString().split(".")[0]}/11`;
+}
+
+function sourceRetrievedFromNpm(packageName: string): string {
+  return `S854\t"https://registry.npmjs.org/${packageName}"\tS813\t${wikiDataDate()}`;
 }
 
 async function quickstatementNpmPackage(
@@ -24,15 +30,26 @@ async function quickstatementNpmPackage(
   ).json();
   const homepage = (manifest as any).homepage;
 
-  if (!homepage) {
-    return "";
+  const versions = Object.keys((manifest as any).versions).map((version) =>
+    stripIndent(
+      `${wikidataId}\tP348\t"${version}"\t${sourceRetrievedFromNpm(
+        packageName
+      )}`
+    )
+  );
+
+  return stripIndent(`
+  ${
+    homepage
+      ? stripIndent(
+          `${wikidataId}\tP856\t"${homepage}"\t${sourceRetrievedFromNpm(
+            packageName
+          )}`
+        )
+      : ""
   }
-
-  const date = new Date();
-
-  return `${wikidataId}\tP856\t"${homepage}"\tS854\t"https://registry.npmjs.org/${packageName}"\tS813\t${wikiDataDate(
-    date
-  )}`;
+  ${versions.join("\n")}
+  `);
 }
 
 for (const obj of (queryRes as any).results.bindings) {
