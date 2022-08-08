@@ -1,6 +1,5 @@
 import got from "got";
 import { queryWikidata } from "./wikidata-query.js";
-import stripIndent from "strip-indent";
 
 const queryRes = await queryWikidata(`
 SELECT DISTINCT ?item ?itemLabel ?npmPackageName ?homepage ?versions WHERE {
@@ -13,43 +12,57 @@ SELECT DISTINCT ?item ?itemLabel ?npmPackageName ?homepage ?versions WHERE {
 LIMIT 10
 `);
 
+function tabSeparatedList(...items: string[]): string {
+  return items.join("\t");
+}
+
 function wikiDataDate(date: Date = new Date()): string {
   return `+${date.toISOString().split(".")[0]}/11`;
 }
 
 function sourceRetrievedFromNpm(packageName: string): string {
-  return `S854\t"https://registry.npmjs.org/${packageName}"\tS813\t${wikiDataDate()}`;
+  return tabSeparatedList(
+    "S854",
+    `"https://registry.npmjs.org/${packageName}"`,
+    "S813",
+    wikiDataDate()
+  );
 }
 
 async function quickstatementNpmPackage(
   packageName: string,
   wikidataId: string
 ): Promise<string> {
+  const statements: string[] = [];
+
   const manifest = await got(
     `https://registry.npmjs.org/${packageName}`
   ).json();
   const homepage = (manifest as any).homepage;
 
   const versions = Object.keys((manifest as any).versions).map((version) =>
-    stripIndent(
-      `${wikidataId}\tP348\t"${version}"\t${sourceRetrievedFromNpm(
-        packageName
-      )}`
+    tabSeparatedList(
+      wikidataId,
+      "P348",
+      `"${version}"`,
+      sourceRetrievedFromNpm(packageName)
     )
   );
 
-  return stripIndent(`
-  ${
-    homepage
-      ? stripIndent(
-          `${wikidataId}\tP856\t"${homepage}"\t${sourceRetrievedFromNpm(
-            packageName
-          )}`
-        )
-      : ""
+  statements.push(...versions);
+
+  if (homepage) {
+    const homepageStatement = tabSeparatedList(
+      wikidataId,
+      "P856",
+      `"${homepage}"`,
+      sourceRetrievedFromNpm(packageName)
+    );
+
+    statements.push(homepageStatement);
   }
-  ${versions.join("\n")}
-  `);
+
+  return statements.join("\n");
 }
 
 for (const obj of (queryRes as any).results.bindings) {
