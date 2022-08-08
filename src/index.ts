@@ -2,10 +2,8 @@ import got from "got";
 import { queryWikidata } from "./wikidata-query.js";
 
 const queryRes = await queryWikidata(`
-SELECT DISTINCT ?item ?itemLabel ?npmPackageName ?homepage ?versions WHERE {
+SELECT DISTINCT ?item ?itemLabel ?npmPackageName WHERE {
   ?item wdt:P8262 ?npmPackageName.
-  OPTIONAL { ?item wdt:P856 ?homepage. }
-  OPTIONAL { ?item wdt:P348 ?versions. }
   SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE]". }
 }
 
@@ -17,7 +15,7 @@ function tabSeparatedList(...items: string[]): string {
 }
 
 function wikiDataDate(date: Date = new Date()): string {
-  return `+${date.toISOString().split(".")[0]}/11`;
+  return `+${date.toISOString().split(".")[0]}Z/11`;
 }
 
 function sourceRetrievedFromNpm(packageName: string): string {
@@ -38,18 +36,21 @@ async function quickstatementNpmPackage(
   const manifest = await got(
     `https://registry.npmjs.org/${packageName}`
   ).json();
-  const homepage = (manifest as any).homepage;
 
   const versions = Object.keys((manifest as any).versions).map((version) =>
     tabSeparatedList(
       wikidataId,
       "P348",
       `"${version}"`,
+      "P577",
+      wikiDataDate(new Date((manifest as any).time[version])),
       sourceRetrievedFromNpm(packageName)
     )
   );
 
   statements.push(...versions);
+
+  const homepage = (manifest as any).homepage;
 
   if (homepage) {
     const homepageStatement = tabSeparatedList(
@@ -60,6 +61,19 @@ async function quickstatementNpmPackage(
     );
 
     statements.push(homepageStatement);
+  }
+
+  const bugtracker = (manifest as any).bugs;
+
+  if (bugtracker && bugtracker.url) {
+    const bugtrackerStatement = tabSeparatedList(
+      wikidataId,
+      "P1401",
+      `"${bugtracker.url}"`,
+      sourceRetrievedFromNpm(packageName)
+    );
+
+    statements.push(bugtrackerStatement);
   }
 
   return statements.join("\n");
