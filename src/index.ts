@@ -1,31 +1,23 @@
-import got from "got";
-import { queryWikidata } from "./wikidata-query.js";
+import { getPackageManifest } from "./npm-registry.js";
+import {
+  sourceRetrievedFromNpm,
+  tabSeparatedList,
+  wikiDataDate,
+} from "./util.js";
+import { QueryResult, queryWikidata } from "./wikidata-query.js";
 
-const queryRes = await queryWikidata(`
+interface QueryVariables {
+  item: any;
+  itemLabel: any;
+  npmPackageName: any;
+}
+
+const queryRes: QueryResult<QueryVariables> = await queryWikidata(`
 SELECT DISTINCT ?item ?itemLabel ?npmPackageName WHERE {
   ?item wdt:P8262 ?npmPackageName.
   SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE]". }
 }
-
-LIMIT 10
 `);
-
-function tabSeparatedList(...items: string[]): string {
-  return items.join("\t");
-}
-
-function wikiDataDate(date: Date = new Date()): string {
-  return `+${date.toISOString().split(".")[0]}Z/11`;
-}
-
-function sourceRetrievedFromNpm(packageName: string): string {
-  return tabSeparatedList(
-    "S854",
-    `"https://registry.npmjs.org/${packageName}"`,
-    "S813",
-    wikiDataDate()
-  );
-}
 
 async function quickstatementNpmPackage(
   packageName: string,
@@ -33,11 +25,9 @@ async function quickstatementNpmPackage(
 ): Promise<string> {
   const statements: string[] = [];
 
-  const manifest = await got(
-    `https://registry.npmjs.org/${packageName}`
-  ).json();
+  const manifest = await getPackageManifest(packageName);
 
-  const versions = Object.keys((manifest as any).versions).map((version) =>
+  const versions = Object.keys(manifest.versions).map((version) =>
     tabSeparatedList(
       wikidataId,
       "P348",
@@ -50,18 +40,18 @@ async function quickstatementNpmPackage(
 
   statements.push(...versions);
 
-  const homepage = (manifest as any).homepage;
+  // const homepage = (manifest as any).homepage;
 
-  if (homepage) {
-    const homepageStatement = tabSeparatedList(
-      wikidataId,
-      "P856",
-      `"${homepage}"`,
-      sourceRetrievedFromNpm(packageName)
-    );
+  // if (homepage) {
+  //   const homepageStatement = tabSeparatedList(
+  //     wikidataId,
+  //     "P856",
+  //     `"${homepage}"`,
+  //     sourceRetrievedFromNpm(packageName)
+  //   );
 
-    statements.push(homepageStatement);
-  }
+  //   statements.push(homepageStatement);
+  // }
 
   const bugtracker = (manifest as any).bugs;
 
@@ -79,7 +69,7 @@ async function quickstatementNpmPackage(
   return statements.join("\n");
 }
 
-for (const obj of (queryRes as any).results.bindings) {
+for (const obj of queryRes.results.bindings) {
   console.log(
     await quickstatementNpmPackage(
       obj.npmPackageName.value,
