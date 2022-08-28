@@ -9,13 +9,15 @@ export async function quickstatementNpmPackage(
   packageName: string,
   wikidataId: string
 ): Promise<string> {
+  const statement = (...parts: string[]) =>
+    tabSeparatedList(wikidataId, ...parts);
+
   const statements: string[] = [];
 
   const manifest = await getPackageManifest(packageName);
 
   const versions = Object.keys(manifest.versions).map((version) =>
-    tabSeparatedList(
-      wikidataId,
+    statement(
       "P348",
       `"${version}"`,
       "P577",
@@ -29,8 +31,7 @@ export async function quickstatementNpmPackage(
   const homepage = manifest.homepage;
 
   if (homepage) {
-    const homepageStatement = tabSeparatedList(
-      wikidataId,
+    const homepageStatement = statement(
       "P856",
       `"${homepage}"`,
       sourceRetrievedFromNpm(packageName)
@@ -42,8 +43,7 @@ export async function quickstatementNpmPackage(
   const bugtracker = manifest.bugs;
 
   if (bugtracker && bugtracker.url) {
-    const bugtrackerStatement = tabSeparatedList(
-      wikidataId,
+    const bugtrackerStatement = statement(
       "P1401",
       `"${bugtracker.url}"`,
       sourceRetrievedFromNpm(packageName)
