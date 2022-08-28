@@ -1,7 +1,14 @@
 import got from "got";
 
 interface RegistryResult {
-  versions: any[];
+  versions: {
+    [version: string]: any;
+  };
+  bugs?: { url: string };
+  homepage?: string;
+  time: {
+    [version: string]: any;
+  };
 }
 
 export async function getPackageManifest(

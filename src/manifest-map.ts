@@ -19,27 +19,27 @@ export async function quickstatementNpmPackage(
       "P348",
       `"${version}"`,
       "P577",
-      wikiDataDate(new Date((manifest as any).time[version])),
+      wikiDataDate(new Date(manifest.time[version])),
       sourceRetrievedFromNpm(packageName)
     )
   );
 
   statements.push(...versions);
 
-  // const homepage = (manifest as any).homepage;
+  const homepage = manifest.homepage;
 
-  // if (homepage) {
-  //   const homepageStatement = tabSeparatedList(
-  //     wikidataId,
-  //     "P856",
-  //     `"${homepage}"`,
-  //     sourceRetrievedFromNpm(packageName)
-  //   );
+  if (homepage) {
+    const homepageStatement = tabSeparatedList(
+      wikidataId,
+      "P856",
+      `"${homepage}"`,
+      sourceRetrievedFromNpm(packageName)
+    );
 
-  //   statements.push(homepageStatement);
-  // }
+    statements.push(homepageStatement);
+  }
 
-  const bugtracker = (manifest as any).bugs;
+  const bugtracker = manifest.bugs;
 
   if (bugtracker && bugtracker.url) {
     const bugtrackerStatement = tabSeparatedList(

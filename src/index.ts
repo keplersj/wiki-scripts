@@ -2,9 +2,9 @@ import { quickstatementNpmPackage } from "./manifest-map.js";
 import { QueryResult, queryWikidata } from "./wikidata-query.js";
 
 interface QueryVariables {
-  item: any;
-  itemLabel: any;
-  npmPackageName: any;
+  item: { value: string };
+  itemLabel: { value: string };
+  npmPackageName: { value: string };
 }
 
 const queryRes: QueryResult<QueryVariables> = await queryWikidata(`
