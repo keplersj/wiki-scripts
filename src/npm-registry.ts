@@ -2,12 +2,12 @@ import got from "got";
 
 interface RegistryResult {
   versions: {
-    [version: string]: any;
+    [version: string]: Object;
   };
   bugs?: { url: string };
   homepage?: string;
   time: {
-    [version: string]: any;
+    [version: string]: string;
   };
 }
 
