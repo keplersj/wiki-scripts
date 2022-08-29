@@ -7,6 +7,10 @@ const mockManifest = {
   time: {
     "1.0.0": new Date().toISOString(),
   },
+  homepage: "https://bullshit.fake/",
+  bugs: {
+    url: "https://bullshit.fake/bugtracker",
+  },
 };
 
 const mockedGot = jest.fn();
@@ -22,9 +26,11 @@ describe("#quickstatementNpmPackage", () => {
   it("maps an npm package to QuickStatements", async () => {
     const result = await quickstatementNpmPackage("test-package", "W111111");
 
-    expect(result).toMatchInlineSnapshot(
-      `"W111111	P348	\\"1.0.0\\"	P577	+2022-01-01T00:00:00Z/11	S854	\\"https://registry.npmjs.org/test-package\\"	S813	+2022-01-01T00:00:00Z/11"`
-    );
+    expect(result).toMatchInlineSnapshot(`
+      "W111111	P348	\\"1.0.0\\"	P577	+2022-01-01T00:00:00Z/11	S854	\\"https://registry.npmjs.org/test-package\\"	S813	+2022-01-01T00:00:00Z/11
+      W111111	P856	\\"https://bullshit.fake/\\"	S854	\\"https://registry.npmjs.org/test-package\\"	S813	+2022-01-01T00:00:00Z/11
+      W111111	P1401	\\"https://bullshit.fake/bugtracker\\"	S854	\\"https://registry.npmjs.org/test-package\\"	S813	+2022-01-01T00:00:00Z/11"
+    `);
     expect(mockedGot.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
