@@ -1,26 +1,27 @@
-import { quickstatementNpmPackage } from "./manifest-map.js";
-import { QueryResult, queryWikidata } from "./wikidata-query.js";
+import meow from "meow";
+import { match } from "ts-pattern";
+import { exec as npmPackageMap } from "./npm-package-map/cli.js";
 
-interface QueryVariables {
-  item: { value: string };
-  itemLabel: { value: string };
-  npmPackageName: { value: string };
-}
+const cli = meow(
+  `
+	Usage
+	  $ wiki-scripts <command>
 
-const queryRes: QueryResult<QueryVariables> = await queryWikidata(`
-SELECT DISTINCT ?item ?itemLabel ?npmPackageName WHERE {
-  ?item wdt:P8262 ?npmPackageName.
-  SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE]". }
-}
+	Commands
+	  npm-package-map  Queries Wikidata for NPM Packages, pulls updates into QuickStatements batch
 
-LIMIT 10
-`);
+	Examples
+	  $ wiki-scripts npm-package-map
+`,
+  {
+    importMeta: import.meta,
+  }
+);
 
-for (const obj of queryRes.results.bindings) {
-  console.log(
-    await quickstatementNpmPackage(
-      obj.npmPackageName.value,
-      obj.itemLabel.value
-    )
-  );
-}
+match<string, void>(cli.input[0])
+  .with("npm-package-map", npmPackageMap)
+  .otherwise(() => {
+    console.log(
+      "No valid command provided. Please see wiki-scripts --help for more."
+    );
+  });
