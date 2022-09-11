@@ -14,7 +14,9 @@ export interface QueryResult<T extends QueryVariables> {
   };
 }
 
-export async function queryWikidata<T>(query: string): Promise<QueryResult<T>> {
+export async function queryWikidata<T extends QueryVariables>(
+  query: string
+): Promise<QueryResult<T>> {
   return got(
     `https://query.wikidata.org/sparql?${stringify({
       query,

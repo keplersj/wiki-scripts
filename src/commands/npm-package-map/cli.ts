@@ -1,5 +1,5 @@
 import { quickstatementNpmPackage } from "./manifest-map.js";
-import { QueryResult, queryWikidata } from "./wikidata-query.js";
+import { QueryResult, queryWikidata } from "../../wikidata/wikidata-query.js";
 
 interface QueryVariables {
   item: { value: string };
