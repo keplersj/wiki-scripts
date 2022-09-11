@@ -8,7 +8,7 @@ import {
   sourceRetrievedFromNpm,
   stringValue,
   tabSeparatedList,
-  wikiDataDate,
+  dateValue,
 } from "../../wikidata/quickstatements.js";
 import { getPackageManifest } from "./npm-registry.js";
 
@@ -28,7 +28,7 @@ export async function quickstatementNpmPackage(
       softwareVersionIdentifier,
       stringValue(version),
       publicationDate,
-      wikiDataDate(new Date(manifest.time[version])),
+      dateValue(new Date(manifest.time[version])),
       sourceRetrievedFromNpm(packageName)
     )
   );

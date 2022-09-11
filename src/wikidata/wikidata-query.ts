@@ -24,3 +24,37 @@ export async function queryWikidata<T extends QueryVariables>(
     { headers: { Accept: "application/sparql-results+json" } }
   ).json();
 }
+
+interface ItemsWithPropertyOptions {
+  limit: number;
+}
+
+const defaultItemsWithPropertyOptions: ItemsWithPropertyOptions = {
+  limit: 10,
+};
+
+export interface ItemsWithPropertyVariables {
+  item: { value: string };
+  itemLabel: { value: string };
+  propertyValue: { value: string };
+}
+
+export async function itemsWithProperty(
+  property: string,
+  options: Partial<ItemsWithPropertyOptions> = defaultItemsWithPropertyOptions
+) {
+  const queryString = `
+  SELECT DISTINCT ?item ?itemLabel ?propertyValue WHERE {
+    ?item wdt:${property} ?propertyValue.
+    SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE]". }
+  }
+  
+  ${options.limit ? `LIMIT ${options.limit}` : ""}
+  `;
+
+  const queryRes: QueryResult<ItemsWithPropertyVariables> = await queryWikidata(
+    queryString
+  );
+
+  return queryRes;
+}
