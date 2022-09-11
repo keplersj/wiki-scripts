@@ -1,5 +1,6 @@
 import { quickstatementNpmPackage } from "./manifest-map.js";
 import { QueryResult, queryWikidata } from "../../wikidata/wikidata-query.js";
+import { npmPackage } from "../../wikidata/properties.js";
 
 interface QueryVariables {
   item: { value: string };
@@ -9,7 +10,7 @@ interface QueryVariables {
 
 const queryString = `
 SELECT DISTINCT ?item ?itemLabel ?npmPackageName WHERE {
-  ?item wdt:P8262 ?npmPackageName.
+  ?item wdt:${npmPackage} ?npmPackageName.
   SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE]". }
 }
 

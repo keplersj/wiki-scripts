@@ -1,4 +1,4 @@
-import { sourceRetrievedFromNpm } from "./util";
+import { sourceRetrievedFromNpm } from "./quickstatements.js";
 import fc from "fast-check";
 
 describe("#sourceRetrievedFromNpm", () => {

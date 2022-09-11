@@ -1,9 +1,16 @@
-import { getPackageManifest } from "./npm-registry.js";
+import {
+  bugTrackerSystem,
+  officialWebsite,
+  publicationDate,
+  softwareVersionIdentifier,
+} from "../../wikidata/properties.js";
 import {
   sourceRetrievedFromNpm,
+  stringValue,
   tabSeparatedList,
   wikiDataDate,
-} from "./util.js";
+} from "../../wikidata/quickstatements.js";
+import { getPackageManifest } from "./npm-registry.js";
 
 export async function quickstatementNpmPackage(
   packageName: string,
@@ -18,9 +25,9 @@ export async function quickstatementNpmPackage(
 
   const versions = Object.keys(manifest.versions).map((version) =>
     statement(
-      "P348",
-      `"${version}"`,
-      "P577",
+      softwareVersionIdentifier,
+      stringValue(version),
+      publicationDate,
       wikiDataDate(new Date(manifest.time[version])),
       sourceRetrievedFromNpm(packageName)
     )
@@ -32,8 +39,8 @@ export async function quickstatementNpmPackage(
 
   if (homepage) {
     const homepageStatement = statement(
-      "P856",
-      `"${homepage}"`,
+      officialWebsite,
+      stringValue(homepage),
       sourceRetrievedFromNpm(packageName)
     );
 
@@ -44,8 +51,8 @@ export async function quickstatementNpmPackage(
 
   if (bugtracker && bugtracker.url) {
     const bugtrackerStatement = statement(
-      "P1401",
-      `"${bugtracker.url}"`,
+      bugTrackerSystem,
+      stringValue(bugtracker.url),
       sourceRetrievedFromNpm(packageName)
     );
 

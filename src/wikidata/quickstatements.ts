@@ -1,3 +1,9 @@
+import { sourceReferenceUrl, sourceRetrieved } from "./properties";
+
+export function stringValue(value: string): string {
+  return `"${value}"`;
+}
+
 export function tabSeparatedList(...items: string[]): string {
   return items.join("\t");
 }
@@ -8,9 +14,9 @@ export function wikiDataDate(date: Date = new Date()): string {
 
 export function sourceRetrievedFromNpm(packageName: string): string {
   return tabSeparatedList(
-    "S854",
-    `"https://registry.npmjs.org/${packageName}"`,
-    "S813",
+    sourceReferenceUrl,
+    stringValue(`https://registry.npmjs.org/${packageName}`),
+    sourceRetrieved,
     wikiDataDate()
   );
 }
