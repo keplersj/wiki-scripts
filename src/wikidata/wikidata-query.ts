@@ -26,12 +26,10 @@ export async function queryWikidata<T extends QueryVariables>(
 }
 
 interface ItemsWithPropertyOptions {
-  limit: number;
+  limit?: number;
 }
 
-const defaultItemsWithPropertyOptions: ItemsWithPropertyOptions = {
-  limit: 10,
-};
+const defaultItemsWithPropertyOptions: ItemsWithPropertyOptions = {};
 
 export interface ItemsWithPropertyVariables {
   item: { value: string };
