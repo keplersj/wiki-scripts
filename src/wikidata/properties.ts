@@ -18,3 +18,15 @@ export const sourceRetrieved = "S813";
 
 // See [npm package](https://www.wikidata.org/wiki/Property:P8262) on Wikidata
 export const npmPackage = "P8262";
+
+// See [crates.io ID](https://www.wikidata.org/wiki/Property:P4763) on Wikidata
+export const cratesIoId = "P4763";
+
+// See [RubyGems gem](https://www.wikidata.org/wiki/Property:P5566) on Wikidata
+export const rubygemsGem = "P5566";
+
+// See [Repology project name](https://www.wikidata.org/wiki/Property:P6931) on Wikidata
+export const repologyProjectName = "P6931";
+
+// Se [Flathub ID](https://www.wikidata.com/wiki/Property:P4655) on Wikidata
+export const flathubId = "P4655";

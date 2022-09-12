@@ -3,9 +3,13 @@
 exports[`Wikidata Properties Aliases exports as expected 1`] = `
 Object {
   "bugTrackerSystem": "P1401",
+  "cratesIoId": "P4763",
+  "flathubId": "P4655",
   "npmPackage": "P8262",
   "officialWebsite": "P856",
   "publicationDate": "P577",
+  "repologyProjectName": "P6931",
+  "rubygemsGem": "P5566",
   "softwareVersionIdentifier": "P348",
   "sourceReferenceUrl": "S854",
   "sourceRetrieved": "S813",
