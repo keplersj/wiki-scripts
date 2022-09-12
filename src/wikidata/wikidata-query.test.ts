@@ -5,7 +5,11 @@ mockedGot.mockReturnValue({
 
 jest.mock("got", () => mockedGot);
 
-import { queryWikidata } from "./wikidata-query";
+beforeEach(() => {
+  mockedGot.mockClear();
+});
+
+import { itemsWithProperty, queryWikidata } from "./wikidata-query";
 
 describe("#queryWikidata", () => {
   it("calls the Wikidata query service as expected", async () => {
@@ -35,5 +39,21 @@ describe("#queryWikidata", () => {
         ],
       ]
     `);
+  });
+});
+
+describe("#itemsWithProperty", () => {
+  it("calls the Wikidata query as expected", async () => {
+    const result = await itemsWithProperty("P1234");
+
+    expect(result).toMatchSnapshot();
+    expect(mockedGot.mock.calls).toMatchSnapshot();
+  });
+
+  it("calls the Wikidata query as expected, with limit specified", async () => {
+    const result = await itemsWithProperty("P1234", { limit: 1000 });
+
+    expect(result).toMatchSnapshot();
+    expect(mockedGot.mock.calls).toMatchSnapshot();
   });
 });
