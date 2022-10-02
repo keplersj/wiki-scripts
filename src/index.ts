@@ -11,7 +11,7 @@ import {
   repologyPackageMapHandler,
   rubygemsPackageImportHandler,
   rubygemsPackageMapHandler,
-  wikiaCheckHandler,
+  fandomCheckHandler,
 } from "./commands/index.js";
 
 const cli = meow(
@@ -53,7 +53,7 @@ match<string, void>(cli.input[0])
   .with("rubygems-package-import", rubygemsPackageImportHandler)
   .with("repology-package-map", repologyPackageMapHandler)
   .with("repology-package-import", repologyPackageImportHandler)
-  .with("fandom-check", wikiaCheckHandler(cli.input[1]))
+  .with("fandom-check", fandomCheckHandler(cli.input[1]))
   .otherwise(() => {
     console.log(
       "No valid command provided. Please see wiki-scripts --help for more."
