@@ -27,7 +27,7 @@ export function createExec(fandomWiki: string, wikiCategory: string) {
     ];
 
     const wikiPagesNotOnWikidata = articles.filter(
-      (article) => !wikiDataValues.includes(article.title)
+      (article) => !wikiDataValues.includes(article.url.replace("/wiki/", ""))
     );
 
     console.log(`# THIS FILE WAS AUTO-GENERATED ON ${new Date()}
