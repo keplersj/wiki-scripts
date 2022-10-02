@@ -17,34 +17,45 @@ export interface FandomResponse {
 export async function getFandomArticles(
   wiki: string,
   offset: string = "",
-  limit: number = 100
+  limit: number = 100,
+  additionalOptions: object = {}
 ): Promise<FandomResponse> {
   return got
     .get(
       `https://${wiki}.fandom.com/api/v1/Articles/List?${stringify({
         limit,
         offset,
+        ...additionalOptions,
       })}`
     )
     .json();
 }
 
-export async function getAllFandomArticleTitles(
-  wiki: string
-): Promise<string[]> {
-  const titles: string[] = [];
+export async function getAllFandomArticles(
+  wiki: string,
+  additionalOptions: object = {}
+): Promise<FandomItem[]> {
+  const itemCollector: FandomItem[] = [];
   let requestOffset: any = "";
 
   while (requestOffset !== undefined) {
     const { items, offset } = await getFandomArticles(
       wiki,
       requestOffset,
-      1000
+      1000,
+      additionalOptions
     );
-    const itemTitles = items.map((item) => item.title);
-    titles.push(...itemTitles);
+    itemCollector.push(...items);
     requestOffset = offset;
   }
 
-  return titles;
+  return itemCollector;
+}
+
+export async function getAllFandomArticleTitles(
+  wiki: string,
+  additionalOptions: object = {}
+): Promise<string[]> {
+  const items = await getAllFandomArticles(wiki, additionalOptions);
+  return items.map((item) => item.title);
 }

@@ -12,6 +12,7 @@ import {
   rubygemsPackageImportHandler,
   rubygemsPackageMapHandler,
   fandomCheckHandler,
+  fandomCategoryMapHandler,
 } from "./commands/index.js";
 
 const cli = meow(
@@ -22,6 +23,8 @@ const cli = meow(
 	Commands
 	  npm-package-map  Queries Wikidata for NPM Packages, pulls updates into QuickStatements batch
     fandom-check <wiki>  Query Wikidata for pages from a Wikia/Fandom wiki, check for overlap
+    fandom-category-map <wiki> <category> Create QuickStatements for the pages in a Fandom wiki's category
+
 
   Planned (unimplemented) Commands
     npm-package-import  Creates Wikidata items for any package in the NPM registry without a Wikidata item
@@ -36,6 +39,8 @@ const cli = meow(
 
 	Examples
 	  $ wiki-scripts npm-package-map
+    $ wiki-scripts fandom-check minecraft
+    $ wiki-scripts fandom-category-map minecraft Neutral_mobs
 `,
   {
     importMeta: import.meta,
@@ -54,6 +59,10 @@ match<string, void>(cli.input[0])
   .with("repology-package-map", repologyPackageMapHandler)
   .with("repology-package-import", repologyPackageImportHandler)
   .with("fandom-check", fandomCheckHandler(cli.input[1]))
+  .with(
+    "fandom-category-map",
+    fandomCategoryMapHandler(cli.input[1], cli.input[2])
+  )
   .otherwise(() => {
     console.log(
       "No valid command provided. Please see wiki-scripts --help for more."

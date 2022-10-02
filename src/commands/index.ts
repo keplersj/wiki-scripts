@@ -9,3 +9,4 @@ export { exec as rubygemsPackageImportHandler } from "./unimplemented/cli.js";
 export { exec as repologyPackageMapHandler } from "./unimplemented/cli.js";
 export { exec as repologyPackageImportHandler } from "./unimplemented/cli.js";
 export { createExec as fandomCheckHandler } from "./fandom-check/cli.js";
+export { createExec as fandomCategoryMapHandler } from "./fandom-category-map/cli.js";
