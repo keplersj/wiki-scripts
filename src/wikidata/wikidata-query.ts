@@ -93,6 +93,7 @@ export async function getItem(id: string): Promise<GetIDResult> {
 
 interface ItemsWithPropertyOptions {
   limit?: number;
+  valueStartsWith?: string;
 }
 
 const defaultItemsWithPropertyOptions: ItemsWithPropertyOptions = {};
@@ -111,6 +112,11 @@ export async function itemsWithProperty(
   SELECT DISTINCT ?item ?itemLabel ?propertyValue WHERE {
     ?item wdt:${property} ?propertyValue.
     SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE]". }
+    ${
+      options.valueStartsWith
+        ? `FILTER(STRSTARTS(STR(?propertyValue), "${options.valueStartsWith}"))`
+        : ""
+    }
   }
   
   ${options.limit ? `LIMIT ${options.limit}` : ""}

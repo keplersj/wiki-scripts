@@ -28,5 +28,8 @@ export const rubygemsGem = "P5566";
 // See [Repology project name](https://www.wikidata.org/wiki/Property:P6931) on Wikidata
 export const repologyProjectName = "P6931";
 
-// Se [Flathub ID](https://www.wikidata.com/wiki/Property:P4655) on Wikidata
+// See [Flathub ID](https://www.wikidata.com/wiki/Property:P4655) on Wikidata
 export const flathubId = "P4655";
+
+// See [Fandom article ID](https://www.wikidata.org/wiki/Property:P6262) on Wikidata
+export const fandomArticleId = "P6262";

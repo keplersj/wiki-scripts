@@ -11,6 +11,7 @@ import {
   repologyPackageMapHandler,
   rubygemsPackageImportHandler,
   rubygemsPackageMapHandler,
+  wikiaCheckHandler,
 } from "./commands/index.js";
 
 const cli = meow(
@@ -20,6 +21,7 @@ const cli = meow(
 
 	Commands
 	  npm-package-map  Queries Wikidata for NPM Packages, pulls updates into QuickStatements batch
+    fandom-check <wiki>  Query Wikidata for pages from a Wikia/Fandom wiki, check for overlap
 
   Planned (unimplemented) Commands
     npm-package-import  Creates Wikidata items for any package in the NPM registry without a Wikidata item
@@ -51,6 +53,7 @@ match<string, void>(cli.input[0])
   .with("rubygems-package-import", rubygemsPackageImportHandler)
   .with("repology-package-map", repologyPackageMapHandler)
   .with("repology-package-import", repologyPackageImportHandler)
+  .with("fandom-check", wikiaCheckHandler(cli.input[1]))
   .otherwise(() => {
     console.log(
       "No valid command provided. Please see wiki-scripts --help for more."

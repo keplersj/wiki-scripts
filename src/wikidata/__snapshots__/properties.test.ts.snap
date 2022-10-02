@@ -4,6 +4,7 @@ exports[`Wikidata Properties Aliases exports as expected 1`] = `
 Object {
   "bugTrackerSystem": "P1401",
   "cratesIoId": "P4763",
+  "fandomArticleId": "P6262",
   "flathubId": "P4655",
   "npmPackage": "P8262",
   "officialWebsite": "P856",
